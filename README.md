@@ -13,12 +13,25 @@ You will need: -
 - Docker compose (ideally v2)
 
 ## Building the images
-To build and push the community v=and enterprise variants and the loader image...
+To build and push the community, enterprise, and loader images...
 
 ```bash
 docker compose build
 docker compose push
 ```
+
+## Building against a new neo4j base image
+When creating new versions of the images create a new branch (we have a branch
+for each neo4j version we build). You should then adjust the corresponding
+tags in the `docker-compose.yml` file to match the branch name you've chosen,
+and the tags in the `Dockerfile` and `Dockerfile-enterprise` files so they pull from
+the correct image sources.
+
+Remember that in each version you need to make changes to the `docker-entrypoint.sh`
+script. Sections between the `IM-BEGIN` and `IM-END` comments (inclusive)
+are our sections that need to be grafted into a copy of the entrypoint
+for the neo4j image you are building for. See the **docker-entrypoint tweaks** section
+below.
 
 ## Typical execution (Docker)
 Assuming you have a set of fragment graph files, start by creating three directories
