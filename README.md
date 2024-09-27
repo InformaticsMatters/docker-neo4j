@@ -20,7 +20,8 @@ docker compose build
 docker compose push
 ```
 
-## Building against a new neo4j base image
+
+## Building against a new neo4j base image
 When creating new versions of the images create a new branch (we have a branch
 for each neo4j version we build). You should then adjust the corresponding
 tags in the `docker-compose.yml` file to match the branch name you've chosen,
