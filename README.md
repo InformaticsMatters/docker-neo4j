@@ -7,10 +7,18 @@ A specialised build of neo4j used by a number of InformaticsMatters projects.
 The repo contains image definitions for our Graph database and a loader
 that populates the graph from an AWS S3 path.
 
-To build and push...
+## Prerequisites
+You will need: -
 
-    $ docker-compose build
-    $ docker-compose push
+- Docker compose (ideally v2)
+
+## Building the images
+To build and push the community v=and enterprise variants and the loader image...
+
+```bash
+docker compose build
+docker compose push
+```
 
 ## Typical execution (Docker)
 Assuming you have a set of fragment graph files, start by creating three directories
@@ -25,6 +33,10 @@ that we'll use to mount into the container image: -
 >   You will need to change the `--ignore-missing-nodes` command option in the
     batch loader script to `--skip-bad-relationships` if you have a script
     that was compiled for neo4j v3.
+
+>   Depending on the _integrity_ of your graph, if you have duplicate nodes
+    (and you shouldn't) you might need to add `--skip-duplicate-nodes to your
+    `load-neo4j.sh` import command.
 
 With directories and data in place you should be able to start the database
 with the following docker command: -
@@ -45,7 +57,7 @@ with the following docker command: -
         -e NEO4J_USERNAME=neo4j \
         -e NEO4J_dbms_directories_data=/data \
         -e NEO4J_dbms_directories_logs=/graph-logs \
-        informaticsmatters/neo4j:4.4.2
+        informaticsmatters/neo4j:4.4.37
 
 Monitor the logs when the container's running to ensure the database build,
 which can take considerable time for non-trivial graphs, progresses without error: -
@@ -69,7 +81,7 @@ An example `.once` script may contain the following index commands: -
 
     CREATE INDEX ON :F2(smiles);
     CREATE INDEX ON :VENDOR(cmpd_id);
-    
+
 An example `.always` script may contain the following cache-warm-up commands: -
 
     CALL apoc.warmup.run(true, true, true);
@@ -107,12 +119,12 @@ We've added the following plugins to the image: -
 Although a build is made available for the Enterprise container
 you are not permitted to use it unless you are in possession of a
 valid licence agreement.
-    
+
 ## The ansible role and playbook
 The Ansible role and corresponding playbook has been written to simplify
 deployment of the neo4j image along with an associated AWS S3-based graph.
 
-The role deploys an S3-based loader prior to spinning-up the neo4j instance. 
+The role deploys an S3-based loader prior to spinning-up the neo4j instance.
 
 ---
 
