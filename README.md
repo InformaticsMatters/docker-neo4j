@@ -132,7 +132,7 @@ We've added the following plugins to the image: -
 ## The enterprise container image
 Although a build is made available for the Enterprise container
 you are not permitted to use it unless you are in possession of a
-valid licence agreement.
+valid neo4j licence agreement.
 
 ## The ansible role and playbook
 The Ansible role and corresponding playbook has been written to simplify
