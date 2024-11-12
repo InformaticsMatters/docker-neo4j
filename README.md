@@ -20,6 +20,24 @@ docker compose build
 docker compose push
 ```
 
+## Building from a non-AMD platform (buildx)
+If you are on an non-AMD platform you should use `docker buildx` to build the images for
+AMD platforms. Here we're building the 4.4.37 image: -
+
+```bash
+TAG=4.4.37
+docker buildx build . --platform linux/amd64 -t informaticsmatters/neo4j:${TAG}
+docker buildx build . -f Dockerfile-enterprise --platform linux/amd64 -t informaticsmatters/neo4j:${TAG}-enterprise
+docker buildx build . -f Dockerfile-s3-loader --platform linux/amd64 -t informaticsmatters/neo4j-s3-loader:${TAG}
+```
+
+And then push the cross-compiled images to Docker hub: -
+
+```bash
+docker push informaticsmatters/neo4j:${TAG}
+docker push informaticsmatters/neo4j:${TAG}-enterprise
+docker push informaticsmatters/neo4j-s3-loader:${TAG}
+```
 
 ## Building against a new neo4j base image
 When creating new versions of the images create a new branch (we have a branch

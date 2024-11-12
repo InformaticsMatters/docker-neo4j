@@ -2,11 +2,11 @@ FROM python:3.12.6-alpine3.20
 
 # Force the binary layer of the stdout and stderr streams
 # to be unbuffered
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 # Base directory for the application
 # Also used for user directory
-ENV APP_ROOT /home/loader
+ENV APP_ROOT=/home/loader
 
 # Containers should NOT run as root
 # (as good practice)
@@ -36,7 +36,7 @@ RUN chmod 755 ${APP_ROOT}/s3-loader-entrypoint.sh && \
 
 # Switch user and move to HOME
 USER loader
-ENV HOME ${APP_ROOT}
+ENV HOME=${APP_ROOT}
 WORKDIR ${APP_ROOT}
 
 CMD ["./s3-loader-entrypoint.sh"]

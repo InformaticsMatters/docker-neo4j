@@ -16,4 +16,4 @@ RUN mkdir /cypher-script && \
     chmod 744 /cypher-script && \
     echo 'dbms.security.procedures.unrestricted=algo.*,apoc.*,gds.*' >> /var/lib/neo4j/conf/neo4j.conf
 
-ENV NEO4J_EDITION community
+ENV NEO4J_EDITION=community

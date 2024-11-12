@@ -16,8 +16,8 @@ RUN mkdir /cypher-script && \
     chmod 744 /cypher-script && \
     echo 'dbms.security.procedures.unrestricted=algo.*,apoc.*,gds.*' >> /var/lib/neo4j/conf/neo4j.conf
 
-ENV NEO4J_EDITION enterprise
+ENV NEO4J_EDITION=enterprise
 
 # The enterprise edition is a licenced product.
 # It MUST NOT BE USED unless you are in possession of a valid licence.
-ENV NEO4J_ACCEPT_LICENSE_AGREEMENT yes
+ENV NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
