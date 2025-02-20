@@ -660,25 +660,28 @@ if [[ "$(id -u)" = "0" ]]; then
     chmod -R 777 ${NEO4J_dbms_directories_logs} || true
     chown -R "neo4j:neo4j" ${NEO4J_dbms_directories_logs} || true
     echo "(chmod/chown done)"
-
-    echo "(listing)"
-    echo "(listing /)"
-    ls -l /
-    echo "(listing ${NEO4J_dbms_directories_data})"
-    ls -l ${NEO4J_dbms_directories_data}
-    echo "(listing ${NEO4J_dbms_directories_logs})"
-    ls -l ${NEO4J_dbms_directories_logs}
-    echo "(listed)"
 fi
+
+echo "(listing)"
+echo "(listing /)"
+ls -l /
+echo "(listing ${NEO4J_dbms_directories_data})"
+ls -l ${NEO4J_dbms_directories_data}
+echo "(listing ${NEO4J_dbms_directories_logs})"
+ls -l ${NEO4J_dbms_directories_logs}
+echo "(listed)"
 # (IM-END)
 
-# (IM-BEGIN) Run our background cypher-runner...
-echo "(starting cypher-runner)..."
-/cypher-runner/cypher-runner.sh &
-echo "(started)"
-echo "cmd=${cmd}"
-echo "exec_cmd=${exec_cmd}"
-# (IM-END)
+# Following disabled (20 Feb 2025) by ABC...
+# Initialisation seems to crash after loading
+#
+# # (IM-BEGIN) Run our background cypher-runner...
+# echo "(starting cypher-runner)..."
+# /cypher-runner/cypher-runner.sh &
+# echo "(started)"
+# echo "cmd=${cmd}"
+# # (IM-END)
+# #echo "exec_cmd=${exec_cmd}"
 
 # Use su-exec to drop privileges to neo4j user
 # Note that su-exec, despite its name, does not replicate the
