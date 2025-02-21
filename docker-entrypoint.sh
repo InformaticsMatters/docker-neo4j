@@ -642,7 +642,6 @@ function get_neo4j_run_cmd {
 
 # (IM-BEGIN) Set a default data directory
 NEO4J_dbms_directories_data=${NEO4J_dbms_directories_data:-/data}
-# (IM-END)
 
 echo "(listing)"
 echo "(listing /)"
