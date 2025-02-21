@@ -644,24 +644,6 @@ function get_neo4j_run_cmd {
 NEO4J_dbms_directories_data=${NEO4J_dbms_directories_data:-/data}
 # (IM-END)
 
-# (IM-BEGIN) Change ownership and permissions in the the data and logs dirs
-# now that (maybe) an initial password has been set
-if [[ "$(id -u)" = "0" ]]; then
-    echo "(touch debug logs) at ${NEO4J_dbms_directories_logs}..."
-    touch ${NEO4J_dbms_directories_logs}/debug.log
-    echo "(touched)"
-
-    echo "(chmod/chown)..."
-    echo "id=$(id -u)"
-    echo "data at ${NEO4J_dbms_directories_data}"
-    chmod -R 777 ${NEO4J_dbms_directories_data} || true
-    chown -R "neo4j:neo4j" ${NEO4J_dbms_directories_data} || true
-    echo "logs at ${NEO4J_dbms_directories_logs}"
-    chmod -R 777 ${NEO4J_dbms_directories_logs} || true
-    chown -R "neo4j:neo4j" ${NEO4J_dbms_directories_logs} || true
-    echo "(chmod/chown done)"
-fi
-
 echo "(listing)"
 echo "(listing /)"
 ls -l /

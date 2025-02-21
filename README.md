@@ -100,9 +100,8 @@ which can take considerable time for non-trivial graphs, progresses without erro
 The image contains the ability to run a series of cypher commands
 after the database has started. It achieves this by running a provided
 `cypher-runner.sh` script located in this image's `/cypher-runner` directory.
-This script is executed towards the end of the `docker-entrypoint.sh`
-and runs in the background until the provided cypher commands have been
-executed.
+And you will need to run this after the Graph data has loaded and the
+Graph DB has been compiled.
 
 All you need to do to run your own early cypher commands
 is to provide them in either a `/cypher-runner/cypher-script.once`
@@ -121,14 +120,6 @@ An example `.always` script may contain the following cache-warm-up commands: -
 >   This command helps improve query performance by quickly [warming up] the
     page-cache by touching pages in parallel optionally loading
     property-records, dynamic-properties and indexes
-
-If the environment variables `NEO4J_USERNAME` and `NEO4J_PASSWORD` are defined,
-the scripts will be run in the background automatically.
-
->   The cypher runner waits for a short period of time after neo4j has been
-    given an opportunity to start (about 60 seconds) before the first run of
-    the script is attempted. This can be configured in the image (refer
-    to the cypher-runner script for the environment variables it inspects).
 
 ## docker-entrypoint tweaks
 **CAUTION**: We replace the supplied neo4h `docker-entrypoint.sh` script with

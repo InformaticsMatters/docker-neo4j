@@ -1,5 +1,15 @@
 # Troubleshooting Guide
 
+## Something went wrong in the import
+Neo4j doesn't like imports with duplicates of bad relationships.
+This can impair performance.
+
+The import progress is written to stdout and is not captured in the logs.
+If you have access to the stdout, that's great, start there.
+If not you might find something in the *import report*. In our Kubernetes
+deployment this is typically written to `/data/data-loader/import.report`
+(unless redirected by the `load-neo4j.sh` script in that directory).
+
 ## Resetting the neo4j password
 -   Enter the graph container in the Pod
 -   Remove the file `/data/data/dbms/auth`
@@ -13,7 +23,7 @@ else. Here we set it to `pilotvolume`: -
         -d '{"password":"pilotvolume"}' \
         -u neo4j:neo4j \
         http://graph-http.graph.svc:7474/user/neo4j/password
-        
+
 >   You can only set the password once
 
 ## Rebuilding the database

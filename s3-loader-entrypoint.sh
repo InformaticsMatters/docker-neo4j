@@ -22,21 +22,14 @@
 : "${GRAPH_WIPE?Need to set GRAPH_WIPE}"
 : "${SYNC_PATH?Need to set SYNC_PATH}"
 
-# If GRAPH_WIPE is 'yes' then the /data directory is
+# If GRAPH_WIPE is 'yes' then the compiled database directory is
 # erased prior to running the S3 sync.
 if [ "$GRAPH_WIPE" = "yes" ]
 then
   echo "Wiping graph data (GRAPH_WIPE=$GRAPH_WIPE)..."
-  rm -rf /data/*
+  rm -rf /data/data/*
 else
   echo "Preserving existing graph data (GRAPH_WIPE=$GRAPH_WIPE)"
-fi
-
-# Remove the graph debug log if NEO4J_dbms_directories_logs is defined
-if [ -n "$NEO4J_dbms_directories_logs" ]; then
-  DEBUG_FILE="$NEO4J_dbms_directories_logs"/debug.log
-  echo "Removing debug log ($DEBUG_FILE)"
-  rm -f "$DEBUG_FILE" || true
 fi
 
 # Where are the scripts (and '.executed') files kept?
