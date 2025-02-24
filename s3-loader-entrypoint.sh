@@ -4,14 +4,16 @@
 # before we do anything sensible...
 #
 # AWS_*         Are AWS credentials for accessing the S3 bucket
-# SYNC_PATH     Is the directory to synchronise S3 content with
-#               Typically the data-loader directory
-# GRAPH_WIPE    If 'yes' then all data is erased, forcing
-#               a resync with S3 and a reload of the Graph data
 # CYPHER_ROOT   The path to the cypher script directory (typically /data)
+# GRAPH_WIPE    If 'yes' the compiled graph is erased, forcing
+#               a resync with S3 and a reload of the Graph data.
+#               Compiled graph data is also erased if the file /data/WIPE exists
+#               (which is then itself removed)
 # POST_SLEEP_S  A value (seconds) to sleep at the end of the script.
 #               this allows the user to inspect the environment prior
 #               to the execution moving to the graph container.
+# SYNC_PATH     Is the directory to synchronise S3 content with
+#               Typically the data-loader directory
 
 : "${AWS_ACCESS_KEY_ID?Need to set AWS_ACCESS_KEY_ID}"
 : "${AWS_SECRET_ACCESS_KEY?Need to set AWS_SECRET_ACCESS_KEY}"
@@ -22,12 +24,12 @@
 : "${GRAPH_WIPE?Need to set GRAPH_WIPE}"
 : "${SYNC_PATH?Need to set SYNC_PATH}"
 
-# If GRAPH_WIPE is 'yes' then the compiled database directory is
-# erased prior to running the S3 sync.
-if [ "$GRAPH_WIPE" = "yes" ]
-then
-  echo "Wiping graph data (GRAPH_WIPE=$GRAPH_WIPE)..."
+# If GRAPH_WIPE is 'yes' or the file /data/WIPE exists
+# then the compiled database directory is erased prior to running the S3 sync.
+if [ "$GRAPH_WIPE" = "yes" ] || [ -f "/data/WIPE" ]; then
+  echo "Wiping graph data (GRAPH_WIPE=$GRAPH_WIPE or /data/WIPE exists)..."
   rm -rf /data/data/*
+  rm -f /data/WIPE
 else
   echo "Preserving existing graph data (GRAPH_WIPE=$GRAPH_WIPE)"
 fi
