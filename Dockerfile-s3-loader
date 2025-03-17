@@ -28,9 +28,12 @@ WORKDIR ${APP_ROOT}/.aws
 # Make the data directory (mount point)
 WORKDIR /data
 
+# Copy hash prep script...
+COPY hash-prep.sh ${APP_ROOT}/
 # Copy entrypoint and set permissions...
 COPY s3-loader-entrypoint.sh ${APP_ROOT}/
 RUN chmod 755 ${APP_ROOT}/s3-loader-entrypoint.sh && \
+    chmod 755 ${APP_ROOT}/hash-prep.sh && \
     chown -R loader:loader ${APP_ROOT} && \
     chown -R loader:loader /data
 

@@ -4,6 +4,7 @@
 # before we do anything sensible...
 #
 # AWS_*         Are AWS credentials for accessing the S3 bucket
+# APP_ROOT      The path to the application root directory
 # CYPHER_ROOT   The path to the cypher script directory (typically /data)
 # GRAPH_WIPE    If 'yes' the compiled graph is erased, forcing
 #               a resync with S3 and a reload of the Graph data.
@@ -19,6 +20,7 @@
 : "${AWS_SECRET_ACCESS_KEY?Need to set AWS_SECRET_ACCESS_KEY}"
 : "${AWS_BUCKET?Need to set AWS_BUCKET}"
 : "${AWS_BUCKET_PATH?Need to set AWS_BUCKET_PATH}"
+: "${APP_ROOT?Need to set APP_ROOT}"
 : "${CYPHER_ROOT?Need to set CYPHER_ROOT}"
 : "${EXTENSION_SCRIPT?Need to set EXTENSION_SCRIPT}"
 : "${GRAPH_WIPE?Need to set GRAPH_WIPE}"
@@ -74,21 +76,18 @@ if [ ! -f "/data/${SYNC_PATH}/${LOAD_SCRIPT}" ]; then
   LS_CMD="aws s3 ls s3://${AWS_BUCKET}/${AWS_BUCKET_PATH}/"
   PATH_OBJECTS=$($LS_CMD | tr -s ' ' | cut -d ' ' -f 4)
 
-  # Now copy each object to the local SYNC_PATH
-  echo "Copying objects..."
-  for PATH_OBJECT in $PATH_OBJECTS; do
-    aws s3 cp \
-      "s3://${AWS_BUCKET}/${AWS_BUCKET_PATH}/${PATH_OBJECT}" \
-      "/data/${SYNC_PATH}/${PATH_OBJECT}"
-  done
+  # Now copy recursively to the local SYNC_PATH
+  echo "Copying objects (recursively)..."
+  aws s3 cp \
+    "s3://${AWS_BUCKET}/${AWS_BUCKET_PATH}/" \
+    "/data/${SYNC_PATH}/" \
+    --recursive
 
-  # Patch 'EXTENSION_SCRIPT'
-  # Here we update any 'out of date' content in the loader.
-  # For older scripts we used '--ignore-missing-nodes'
-  # which is replaced by '--skip-bad-relationships'.
-  echo "Patching ${EXTENSION_SCRIPT}..."
-  sed 's/ignore-missing-nodes/skip-bad-relationships/' "${EXTENSION_SCRIPT}" > /tmp/load.sh
-  cp /tmp/load.sh "${EXTENSION_SCRIPT}"
+  # Now run the 'prep' script.
+  # which concatenates all the hash files to form the nodes and edges
+  # csv.gz files.
+  echo "Running hash-prep.sh..."
+  ${APP_ROOT}/hash-prep.sh /data/${SYNC_PATH}
 
   echo "Download complete."
 
