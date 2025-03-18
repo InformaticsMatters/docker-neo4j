@@ -1,0 +1,7 @@
+
+    echo "($ME) $(date) Imported."
+else
+    echo "($ME) $(date) Database '$IMPORT_TO' already exists."
+fi
+
+echo "($ME) $(date) Finished."

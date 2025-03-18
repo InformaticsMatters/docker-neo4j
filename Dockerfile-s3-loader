@@ -1,4 +1,4 @@
-FROM python:3.12.6-alpine3.20
+FROM python:3.12.6
 
 # Force the binary layer of the stdout and stderr streams
 # to be unbuffered
@@ -10,7 +10,7 @@ ENV APP_ROOT=/home/loader
 
 # Containers should NOT run as root
 # (as good practice)
-RUN adduser -D -h ${APP_ROOT} -s /bin/sh loader
+RUN useradd -m -d ${APP_ROOT} -s /bin/sh loader
 
 RUN /usr/local/bin/python -m pip install --upgrade pip && \
     pip install \
@@ -30,6 +30,8 @@ WORKDIR /data
 
 # Copy hash prep script...
 COPY hash-prep.sh ${APP_ROOT}/
+COPY load-neo4j.sh.HEADER ${APP_ROOT}/
+COPY load-neo4j.sh.FOOTER ${APP_ROOT}/
 # Copy entrypoint and set permissions...
 COPY s3-loader-entrypoint.sh ${APP_ROOT}/
 RUN chmod 755 ${APP_ROOT}/s3-loader-entrypoint.sh && \
