@@ -64,11 +64,12 @@ if [ ! -f "/data/${SYNC_PATH}/${LOAD_SCRIPT}" ]; then
     --recursive \
     --exclude '*/combined/*'
 
-  # Now run the 'prep' script.
-  # which concatenates all the hash files to form the nodes and edges
-  # csv.gz files.
-  echo "Running hash-prep.sh..."
-  ${APP_ROOT}/hash-prep.sh /data/${SYNC_PATH}
+  # Run the 'hash prep' script if a hash5 directory exists in the download.
+  # It concatenates all the hash files to form the (missing) node and edge csv.gz files.
+  if [ -d "/data/${SYNC_PATH}/hash5" ]; then
+    echo "Running hash-prep.sh (hash5 directory exists)..."
+    ${APP_ROOT}/hash-prep.sh /data/${SYNC_PATH}
+  fi
 
   echo "Download complete."
 

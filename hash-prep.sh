@@ -6,6 +6,9 @@
 # and then creates a 'load-neo4j.sh' script that will be used
 # to import the data into Neo4j.
 #
+# NOTE: Only call this if a 'hash5' directory exists in the download directory
+#       (passed as the first argument to this script).
+#
 # As an example all '.csv.gz' files in 'hash5/isomol-nodes/prepared'
 # will be concatenated into 'isomol-nodes.csv.gz' in the root of the
 # download directory.
