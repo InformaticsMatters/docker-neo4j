@@ -69,6 +69,10 @@ cp ${APP_ROOT}/load-neo4j.sh.HEADER load-neo4j.sh
 gz_files=(*nodes.csv.gz)
 for gz_file in "${gz_files[@]}"; do
   hdr=$(echo ${gz_file} | sed 's/.gz//')
+  if [ ! -f "header-${hdr}" ]; then
+    echo "ERROR: header-${hdr} file not found in ${download_dir}"
+    exit 1
+  fi
   echo "        --nodes \"header-${hdr},${gz_file}\" \\" >> load-neo4j.sh
 done
 
@@ -81,6 +85,10 @@ done
 gz_files=(*edges.csv.gz)
 for gz_file in "${gz_files[@]::${#gz_files[@]}-1}"; do
   hdr=$(echo ${gz_file} | sed 's/.gz//')
+  if [ ! -f "header-${hdr}" ]; then
+    echo "ERROR: header-${hdr} file not found in ${download_dir}"
+    exit 1
+  fi
   echo "        --relationships \"header-${hdr},${gz_file}\" \\" >> load-neo4j.sh
 done
 last_file="${gz_files[@]: -1:1}"
