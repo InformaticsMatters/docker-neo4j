@@ -36,7 +36,7 @@ if [ ! -d "${download_dir}/hash5" ]; then
 fi
 
 echo "($ME) $(date) Size of initial download: $(du -sh ${download_dir})"
-pushd ${download_dir}
+pushd ${download_dir} > /dev/null
 
 # Collect all the prepared hashes together
 # ----------------------------------------
@@ -108,4 +108,4 @@ rm -rf ${download_dir}/hash5
 echo "($ME) $(date) Size of final download: $(du -sh ${download_dir})"
 
 echo "($ME) $(date) Done"
-popd
+popd > /dev/null
