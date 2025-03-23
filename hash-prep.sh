@@ -104,8 +104,8 @@ cat ${APP_ROOT}/load-neo4j.sh.FOOTER >> load-neo4j.sh
 # And return to the launch directory
 echo "($ME) $(date) Removing hash5 directory..."
 rm -rf ${download_dir}/hash5
-popd
 
 echo "($ME) $(date) Size of final download: $(du -sh ${download_dir})"
 
 echo "($ME) $(date) Done"
+popd
