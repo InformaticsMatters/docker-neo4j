@@ -18,6 +18,14 @@ fi
 echo "($ME) $(date) Import content is..."
 ls -l $IMPORT_DIRECTORY
 
+# Display the imported graph 'info' file?
+if [ -f "$IMPORT_DIRECTORY/info.yaml" ]; then
+  echo "($ME) $(date) Found info.yaml file..."
+  echo "---"
+  cat $IMPORT_DIRECTORY/info.yaml
+  echo "---"
+fi
+
 # If the destination database exists
 # then do nothing...
 if [ ! -d $NEO4J_dbms_directories_data/databases/$IMPORT_TO.db ]

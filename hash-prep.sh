@@ -35,6 +35,14 @@ if [ ! -d "${download_dir}/hash5" ]; then
   exit 1
 fi
 
+# Display the 'info' file for the 'hash' data?
+if [ -f "info.yaml" ]; then
+  echo "($ME) $(date) Found info.yaml file..."
+  echo "---"
+  cat info.yaml
+  echo "---"
+fi
+
 echo "($ME) $(date) Size of initial download: $(du -sh ${download_dir})"
 pushd ${download_dir} > /dev/null
 
