@@ -19,7 +19,8 @@ echo "($ME) $(date) Import content is..."
 ls -l $IMPORT_DIRECTORY
 
 # Display the imported graph 'info' file?
-if [ -f "$IMPORT_DIRECTORY/info.yaml" ]; then
+if [ -f "$IMPORT_DIRECTORY/info.yaml" ]
+then
   echo "($ME) $(date) Found info.yaml file..."
   echo "---"
   cat $IMPORT_DIRECTORY/info.yaml
