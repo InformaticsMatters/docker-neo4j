@@ -1,0 +1,30 @@
+FROM python:3.12.6
+
+# Force the binary layer of the stdout and stderr streams
+# to be unbuffered
+ENV PYTHONUNBUFFERED=1
+
+# Base directory for the application
+# Also used for user directory
+ENV APP_ROOT=/home/sidecar
+
+# Containers should NOT run as root
+# (as good practice)
+RUN useradd -m -d ${APP_ROOT} -s /bin/sh sidecar
+
+RUN /usr/local/bin/python -m pip install --upgrade pip && \
+    pip install \
+        neo4j==5.28.1
+
+# Copy entrypoint and set permissions...
+COPY sidecar-entrypoint.sh ${APP_ROOT}/
+COPY sidecar.py ${APP_ROOT}/
+RUN chmod 755 ${APP_ROOT}/sidecar-entrypoint.sh && \
+    chmod 755 ${APP_ROOT}/sidecar.py
+
+# Switch user and move to HOME
+USER sidecar
+ENV HOME=${APP_ROOT}
+WORKDIR ${APP_ROOT}
+
+CMD ["./sidecar-entrypoint.sh"]
