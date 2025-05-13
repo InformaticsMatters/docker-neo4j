@@ -4,6 +4,7 @@
 # before we do anything sensible...
 #
 # AWS_*         Are AWS credentials for accessing the S3 bucket
+# APP_ROOT      The path to the application root directory
 # CYPHER_ROOT   The path to the cypher script directory (typically /data)
 # GRAPH_WIPE    If 'yes' the compiled graph is erased, forcing
 #               a resync with S3 and a reload of the Graph data.
@@ -19,24 +20,27 @@
 : "${AWS_SECRET_ACCESS_KEY?Need to set AWS_SECRET_ACCESS_KEY}"
 : "${AWS_BUCKET?Need to set AWS_BUCKET}"
 : "${AWS_BUCKET_PATH?Need to set AWS_BUCKET_PATH}"
+: "${APP_ROOT?Need to set APP_ROOT}"
 : "${CYPHER_ROOT?Need to set CYPHER_ROOT}"
 : "${EXTENSION_SCRIPT?Need to set EXTENSION_SCRIPT}"
 : "${GRAPH_WIPE?Need to set GRAPH_WIPE}"
 : "${SYNC_PATH?Need to set SYNC_PATH}"
 
+ME=s3-loader-entrypoint.sh
+
 # If GRAPH_WIPE is 'yes' or the file /data/WIPE exists
 # then the compiled database directory is erased prior to running the S3 sync.
 if [ "$GRAPH_WIPE" = "yes" ] || [ -f "/data/WIPE" ]; then
-  echo "Wiping graph data (GRAPH_WIPE=$GRAPH_WIPE or /data/WIPE exists)..."
+  echo "($ME) $(date) Wiping graph data (GRAPH_WIPE=$GRAPH_WIPE or /data/WIPE exists)..."
   rm -rf /data/data/*
   rm -f /data/WIPE
 else
-  echo "Preserving existing graph data (GRAPH_WIPE=$GRAPH_WIPE)"
+  echo "($ME) $(date) Preserving existing graph data (GRAPH_WIPE=$GRAPH_WIPE)"
 fi
 
 # Where are the scripts (and '.executed') files kept?
 CYPHER_PATH="$CYPHER_ROOT/cypher-script"
-echo "Making cypher path directory ($CYPHER_PATH)..."
+echo "($ME) $(date) Making cypher path directory ($CYPHER_PATH)..."
 mkdir -p "$CYPHER_PATH"
 
 # We only pull down data if it looks like the sync-path has no loader script.
@@ -50,51 +54,30 @@ if [ ! -f "/data/${SYNC_PATH}/${LOAD_SCRIPT}" ]; then
   # when the 'always script' finishes.
   ALWAYS_EXECUTED_FILE="$CYPHER_PATH/always.executed"
   if [ -n "$ALWAYS_EXECUTED_FILE" ]; then
-    echo "Removing always executed file ($ALWAYS_EXECUTED_FILE)"
+    echo "($ME) $(date) Removing always executed file ($ALWAYS_EXECUTED_FILE)"
     rm -f "$ALWAYS_EXECUTED_FILE" || true
   fi
 
-  echo "Downloading import data..."
+  # Now copy recursively to the local SYNC_PATH
+  echo "($ME) $(date) Copying objects from 's3://${AWS_BUCKET}/${AWS_BUCKET_PATH}'..."
+  aws s3 cp \
+    "s3://${AWS_BUCKET}/${AWS_BUCKET_PATH}/" \
+    "/data/${SYNC_PATH}/" \
+    --recursive \
+    --exclude '*/combined/*'
 
-  # List the bucket's objects (files).
-  # Output is typically: -
-  #
-  #   2019-07-29 18:06:05          0 combine-done
-  #   2019-07-29 18:05:57          0 done
-  #   2019-07-29 18:03:41         38 edges-header.csv
-  #   2019-07-30 19:48:00 22699163411 edges.csv.gz
-  #
-  # And we want...
-  #
-  #   combine-done
-  #   done
-  #   edges-header.csv
-  #   edges.csv.gz
-  echo "Listing S3 path (${AWS_BUCKET}/${AWS_BUCKET_PATH})..."
-  LS_CMD="aws s3 ls s3://${AWS_BUCKET}/${AWS_BUCKET_PATH}/"
-  PATH_OBJECTS=$($LS_CMD | tr -s ' ' | cut -d ' ' -f 4)
+  # Run the 'hash prep' script if a hash5 directory exists in the download.
+  # It concatenates all the hash files to form the (missing) node and edge csv.gz files.
+  if [ -d "/data/${SYNC_PATH}/hash5" ]; then
+    echo "($ME) $(date) Running '${APP_ROOT}/hash-prep.sh /data/${SYNC_PATH}'..."
+    ${APP_ROOT}/hash-prep.sh /data/${SYNC_PATH}
+  fi
 
-  # Now copy each object to the local SYNC_PATH
-  echo "Copying objects..."
-  for PATH_OBJECT in $PATH_OBJECTS; do
-    aws s3 cp \
-      "s3://${AWS_BUCKET}/${AWS_BUCKET_PATH}/${PATH_OBJECT}" \
-      "/data/${SYNC_PATH}/${PATH_OBJECT}"
-  done
-
-  # Patch 'EXTENSION_SCRIPT'
-  # Here we update any 'out of date' content in the loader.
-  # For older scripts we used '--ignore-missing-nodes'
-  # which is replaced by '--skip-bad-relationships'.
-  echo "Patching ${EXTENSION_SCRIPT}..."
-  sed 's/ignore-missing-nodes/skip-bad-relationships/' "${EXTENSION_SCRIPT}" > /tmp/load.sh
-  cp /tmp/load.sh "${EXTENSION_SCRIPT}"
-
-  echo "Download complete."
+  echo "($ME) $(date) Download and preparation complete."
 
 else
 
-  echo "Skipping download - ${LOAD_SCRIPT} exists"
+  echo "($ME) $(date) Skipping download - ${LOAD_SCRIPT} exists"
 
 fi
 
@@ -102,7 +85,7 @@ fi
 # Only interested in this if there's a CYPHER_ROOT
 # (i.e. we're dealing with neo4j)
 if [ -n "$CYPHER_ROOT" ]; then
-  echo "Making ultimate data directory (/data/data)..."
+  echo "($ME) $(date) Making ultimate data directory (/data/data)..."
   mkdir -p "/data/data"
 fi
 
@@ -110,20 +93,22 @@ fi
 # in the expected location for the corresponding cypher scripts.
 if [ "$CYPHER_ONCE_CONTENT" ]; then
   cypher_file=cypher-script.once
-  echo "Writing $CYPHER_PATH/$cypher_file..."
+  echo "($ME) $(date) Writing $CYPHER_PATH/$cypher_file..."
   echo "$CYPHER_ONCE_CONTENT" > "$CYPHER_PATH/$cypher_file"
 fi
 if [ "$CYPHER_ALWAYS_CONTENT" ]; then
   cypher_file=cypher-script.always
-  echo "Writing $CYPHER_PATH/$cypher_file..."
+  echo "($ME) $(date) Writing $CYPHER_PATH/$cypher_file..."
   echo "$CYPHER_ALWAYS_CONTENT" > "$CYPHER_PATH/$cypher_file"
 fi
 
 # Has a POST_SLEEP_S been defined?
 if [ "$POST_SLEEP_S" ]; then
-  echo "POST_SLEEP_S=$POST_SLEEP_S sleeping..."
+  echo "($ME) $(date) POST_SLEEP_S=$POST_SLEEP_S sleeping..."
   sleep "$POST_SLEEP_S"
-  echo "Slept."
+  echo "($ME) $(date) Slept."
 else
-  echo "POST_SLEEP_S is not defined - leaving now..."
+  echo "($ME) $(date) POST_SLEEP_S is not defined - leaving now..."
 fi
+
+echo "($ME) $(date) That's All Folks!"
