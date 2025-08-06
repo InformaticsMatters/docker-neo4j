@@ -29,10 +29,12 @@
 ME=s3-loader-entrypoint.sh
 
 # If GRAPH_WIPE is 'yes' or the file /data/WIPE exists
-# then the compiled database directory is erased prior to running the S3 sync.
+# then the compiled database directory and the SYNC_PATH is erased
+# prior to running the S3 sync.
 if [ "$GRAPH_WIPE" = "yes" ] || [ -f "/data/WIPE" ]; then
   echo "($ME) $(date) Wiping graph data (GRAPH_WIPE=$GRAPH_WIPE or /data/WIPE exists)..."
   rm -rf /data/data/*
+  rm -ff /data/${SYNC_PATH}/*
   rm -f /data/WIPE
 else
   echo "($ME) $(date) Preserving existing graph data (GRAPH_WIPE=$GRAPH_WIPE)"
@@ -42,6 +44,8 @@ fi
 CYPHER_PATH="$CYPHER_ROOT/cypher-script"
 echo "($ME) $(date) Making cypher path directory ($CYPHER_PATH)..."
 mkdir -p "$CYPHER_PATH"
+echo "($ME) $(date) Making SYNC_PATH directory (/data/$SYNC_PATH)..."
+mkdir -p "/data/$SYNC_PATH"
 
 # We only pull down data if it looks like the sync-path has no loader script.
 # Pulling down data again is time-consuming and we insect the
